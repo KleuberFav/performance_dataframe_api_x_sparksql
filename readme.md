@@ -16,17 +16,16 @@ Portanto, a análise comparativa realizada visa explorar qualquer diferença rem
 # Menu
 - [Spark](#spark)
 - [Dados](#dados)
+- [Instância e Coleta de Dados](#instância-e-coleta-de-dados)
 - [Testes](#testes)
-- [Instância](#instância)
-- [Resultados](#resultados)
-- [Conclusão](#conclusão)
+- [Procedimento](#procedimento)
 - [Autor](#autor)
 
 # Spark
 
 A história do Apache Spark começa em 2009, quando Matei Zaharia, um estudante da Universidade de Berkeley, observou as limitações do Hadoop MapReduce, que processava grandes volumes de dados de forma eficiente, mas com algumas barreiras, como a alta latência em operações iterativas e interativas. O Spark foi desenvolvido para superar essas limitações, trazendo uma solução que combinava velocidade e flexibilidade, capaz de processar dados em memória e reduzir drasticamente o tempo de execução de várias tarefas.
 
-![alt text](artefatos/image-2.png)
+![alt text](https://github.com/KleuberFav/performance_dataframe_api_x_sparksql/blob/main/artefatos/image-2.png?raw=true)
 
 Componentes principais e evolução do Spark:
 
@@ -52,7 +51,7 @@ O PySpark desempenha um papel central na popularização do Apache Spark. Ele pe
 
 O Spark tem um otimizador chamado Catalyst, ele otimiza automaticamente as consultas, seja em SQL ou em API do Dataframe. Ele contém uma biblioteca para representar árvores e aplicar regras para manipulá-las Como vimos, tanto o Spark SQL quanto o Dataframe API usa o Catalyst para otimizar a consulta. A seguir um diagrama mostrando como o Catalyst funciona:
 
-![alt text](artefatos/image.png)
+![alt text](https://github.com/KleuberFav/performance_dataframe_api_x_sparksql/blob/main/artefatos/image.png?raw=true)
 
 - Plano de Execução: Catalyst transforma operações de alta abstração em planos de execução otimizados. Esses planos descrevem como as operações serão executadas de forma eficiente, considerando aspectos como paralelismo e distribuição.
 
@@ -137,9 +136,9 @@ Estatísticas Descritivas:
 
 ### Exploratória
 
-![Gráfico de Disperção](artefatos/image-3.png)
+![Gráfico de Disperção](https://github.com/KleuberFav/performance_dataframe_api_x_sparksql/blob/main/artefatos/image-3.png?raw=true)
 
-![alt text](artefatos/image-5.png)
+![alt text](https://github.com/KleuberFav/performance_dataframe_api_x_sparksql/blob/main/artefatos/image-5.png?raw=true)
 
 - Analisando o gráfico de dispersão, podemos ver uma concentração maior entre 11 e 12.5 segundos e variando entre 9 e 13.5 segundos;
 - mais uma evidência de outlier em torno de 16 segundos;
@@ -149,11 +148,100 @@ Estatísticas Descritivas:
 
 # Testes
 
-Para investigar se há uma diferença significativa no tempo de processamento entre a DataFrame API e o Spark SQL, realizamos uma série de testes. Aqui está um resumo do procedimento e dos resultados obtidos:
+Para investigar se há uma diferença significativa no tempo de processamento entre a DataFrame API e o Spark SQL, realizamos uma série de testes. Aqui está um resumo do procedimento:
 
-## Procedimento
+# Passo a Passo para Realizar um Teste de Hipótese
 
-1. **Teste de Normalidade**
+O **teste de hipótese** é uma ferramenta estatística usada para verificar se existe evidência suficiente para rejeitar uma suposição (hipótese nula) sobre uma população, com base em uma amostra de dados. Abaixo, apresento um passo a passo para realizar um teste de hipótese.
+
+## 1. Definir as Hipóteses
+
+### Hipótese Nula (H₀):
+A hipótese nula é a suposição inicial, geralmente representando a ausência de efeito ou diferença.
+- **Exemplo:** "A média de tempo de resposta da API é igual ao tempo de resposta do banco de dados SQL."
+
+### Hipótese Alternativa (H₁):
+A hipótese alternativa é a afirmação que você deseja testar, geralmente representa a existência de um efeito ou diferença.
+- **Exemplo:** "A média de tempo de resposta da API é diferente do tempo de resposta do banco de dados SQL."
+
+---
+
+## 2. Escolher o Nível de Significância (α)
+
+O nível de significância representa o risco que você está disposto a correr de rejeitar a hipótese nula incorretamente (falso positivo). Valores comuns de α são 0,05 (5%) ou 0,01 (1%).
+
+- **Exemplo:** Definir α = 0,05 (5%).
+
+---
+
+## 3. Escolher o Teste Estatístico Adequado
+
+Dependendo do tipo de dados e da distribuição, você pode escolher entre diferentes testes. Alguns exemplos são:
+- **Teste t de Student** (para comparar médias de duas amostras).
+- **Teste qui-quadrado** (para variáveis categóricas).
+- **Teste ANOVA** (para comparar mais de duas médias).
+- **Teste de Mann-Whitney** (não paramétrico).
+
+---
+
+## 4. Verificar a Normalidade dos Dados
+
+Antes de aplicar muitos testes paramétricos, é importante verificar se os dados seguem uma distribuição normal. Isso é necessário porque muitos testes, como o teste t, assumem que os dados são aproximadamente normais.
+
+### Métodos para Verificar a Normalidade:
+- **Histogramas:** Visualize a distribuição dos dados.
+- **Gráficos Q-Q (Quantile-Quantile):** Compare a distribuição dos dados com a distribuição normal teórica.
+- **Testes de Normalidade:** 
+  - **Teste de Shapiro-Wilk:** Adequado para amostras pequenas a moderadas.
+  - **Teste de Kolmogorov-Smirnov:** Comparar a distribuição dos dados com a distribuição normal.
+
+---
+
+## 5. Definir a Região Crítica e a Estatística do Teste
+
+A **região crítica** é o intervalo de valores onde a hipótese nula será rejeitada. O cálculo dessa região depende da distribuição da amostra e do teste escolhido. Para muitos testes, você calculará o valor crítico com base no nível de significância.
+
+---
+
+## 6. Coletar os Dados e Calcular a Estatística do Teste
+
+Após escolher o teste adequado e verificar a normalidade, aplique o teste aos dados e calcule o valor da estatística de teste. Isso geralmente envolve fórmulas específicas para cada tipo de teste (como a fórmula do teste t ou do qui-quadrado).
+
+---
+
+## 7. Tomar uma Decisão
+
+Compare o valor da estatística de teste com o valor crítico ou utilize o **p-valor**:
+
+- **Se o p-valor ≤ α**: Rejeite a hipótese nula (há evidências significativas para a hipótese alternativa).
+- **Se o p-valor > α**: Não rejeite a hipótese nula (não há evidências suficientes para rejeitar a hipótese nula).
+
+---
+
+## 8. Conclusão
+
+Baseado na decisão do passo anterior, escreva a conclusão, interpretando os resultados de acordo com o contexto do problema.
+
+- **Exemplo:** "Com um p-valor de 0,03, rejeitamos a hipótese nula. Portanto, há evidências suficientes para afirmar que o tempo de resposta da API é diferente do tempo de resposta do banco de dados SQL."
+
+### Passo a Passo:
+1. **Nível de significância:** α = 0,05
+2. **Verificar normalidade:** Use testes de normalidade e gráficos.
+3. **Teste escolhido:** Teste t de Student (para amostras independentes)
+4. **Calcular o valor do teste:** Aplicar o teste aos dados coletados.
+5. **Decisão:** Comparar o valor t com o valor crítico ou usar o p-valor para decidir.
+6. **Conclusão:** Se o p-valor for menor que 0,05, rejeitamos H₀.
+
+# Procedimento
+
+1. **Definir as hipóteses:**
+- Hipótese Nula (H0): As medianas dos tempos de execução entre a API DataFrame e o Spark SQL são iguais.
+- Hipótese Alternativa (H1): As medianas dos tempos de execução entre a API DataFrame e o Spark SQL são diferentes.
+
+2. **Definir o Nível de significância:** 
+- α = 0,05
+
+3. **Verificar normalidade**
    - Aplicamos o teste de Shapiro-Wilk para verificar se os dados seguem uma distribuição normal, a fim de avaliar a possibilidade de usar um teste t pareado para comparação das amostras de Spark SQL e DataFrame API.
 
 **Como o Teste de Shapiro-Wilk Funciona**: O teste de Shapiro-Wilk é um teste estatístico que avalia a normalidade de uma distribuição de dados. Ele testa a hipótese nula de que a amostra vem de uma distribuição normal. O teste calcula uma estatística de W que mede a concordância entre os dados observados e a distribuição normal esperada. Um valor p pequeno (menor que um nível de significância pré-determinado, como 0,05) indica que os dados não seguem uma distribuição normal, enquanto um valor p maior sugere que a distribuição dos dados pode ser normal.
@@ -192,13 +280,13 @@ print(f'Estatística do teste de Shapiro-Wilk: {stat:.4f}')
 print(f'Valor p: {p_value:.4f}')
 ```
 
-![alt text](image-1.png)
+![alt text](https://github.com/KleuberFav/performance_dataframe_api_x_sparksql/blob/main/artefatos/image-1.png?raw=true)
 - Estatística do teste de Shapiro-Wilk: 0.8607
 - Valor p: 0.0000
 
 *Como o p-valor é menor que o valor de significância do teste (0.05), rejeitamos a hipótese nula. Logo, os resíduos não seguem uma distribuição normal*
 
-2. **Teste de Comparação**
+4. **Teste escolhido:**
    - Como os dados não seguiram uma distribuição normal, optamos por testes não paramétricos para uma análise mais robusta.
    - Utilizamos o teste de Wilcoxon, um teste não paramétrico para amostras pareadas, adequado para comparar os tempos resultantes da mesma consulta em APIs diferentes (DataFrame API e Spark SQL).
 
@@ -226,11 +314,7 @@ O cálculo dos postos envolve os seguintes passos:
 
 
 
-# Resultados
-
-Hipóteses:
-- Hipótese Nula (H0): As medianas dos tempos de execução entre a API DataFrame e o Spark SQL são iguais.
-- Hipótese Alternativa (H1): As medianas dos tempos de execução entre a API DataFrame e o Spark SQL são diferentes.
+5. **Calcular o valor do teste:**
 
 ```python
 from scipy.stats import wilcoxon
@@ -259,10 +343,10 @@ else:
 - Estatística de Wilcoxon: 896.0000
 - Valor p: 0.8888
 
-Resultado:
+6. **Decisão:**
 * Como o p-valor (0.8887623436669472) é maior ou igual ao nível de significância de 5%, não há evidências suficientes para rejeitar a hipótese nula. Logo não há diferença significativa entre as medianas.
 
-# Conclusão
+7. **Conclusão:**
 
 Após executar 60 amostras para cada tipo de execução (Spark SQL e Dataframe API), Verificamos se os resíduos das amostras entre os tipos de execução segue uma distribuição normal. Analisando o resultado do teste shapiro-wilk, verificamos que os resíduos não seguem uma distribuição normal, então seguimos com um teste paramétrico para verificar se há diferenças no tempo de execução entre as diferentes API.
 O teste escolhido foi a Estatística de Wilcoxon, cujo o p-valor foi maior que o nível de significância de 5%. Logo chegamos a conclusão que não há evidências para rejeitar a hipótese nula. Portanto, ao nível de confiança de 95%, podemos dizer que não há diferença na performance entre Dataframe API e Spark SQL.
