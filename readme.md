@@ -103,11 +103,47 @@ spark.sql("""
 """).collect()
 ```
 
-- Executamos cada operação 60 vezes para obter uma amostra representativa dos tempos de execução e salvamos em um dataframe pandas.
-
 - PRECIPITACAO é o valor de precipitação em milímetros em uma hora.
 - TEMPERATURA_AR é o valor da temperatura do ar em graus Celsius em uma hora.
 - AAAAMM é o valor mês-ano.
+
+```python
+# Criando listas para armazenar os tempos de execução
+df_times = []
+sql_times = []
+
+# Executando 60 vezes
+for _ in range(60):
+    # Limpar cache antes de cada execução
+    spark.catalog.clearCache()
+
+    # Usando a API DataFrame
+    start_time = time()
+    df.groupBy("AAAAMM").agg({"PRECIPITACAO": "sum", "TEMPERATURA_AR": "sum"}).collect()
+    df_time = time() - start_time
+    df_times.append(df_time)
+
+    # Usando Spark SQL
+    start_time = time()
+    spark.sql("""
+        SELECT AAAAMM, SUM(PRECIPITACAO) AS PRECIPITACAO, SUM(TEMPERATURA_AR) AS TEMPERATURA_AR 
+        FROM DF 
+        GROUP BY AAAAMM
+    """).collect()
+    sql_time = time() - start_time
+    sql_times.append(sql_time)
+
+# Criando um DataFrame com os resultados
+result_df = pd.DataFrame({
+    'time_api': df_times,
+    'time_sql': sql_times
+})
+```
+
+- Executamos cada operação 60 vezes para obter uma amostra representativa dos tempos de execução e salvamos em um dataframe pandas;
+- spark.catalog.clearCache() é usado para garantir que o Spark não use dados armazenados em cache da execução anterior. Isso ajuda a obter uma medição mais precisa da performance de cada execução, sem a influência dos dados previamente cacheados;
+- Time() é usado para capturar o tempo antes e depois da execução de cada abordagem, calculando assim o tempo total gasto em cada uma.
+- Os tempos de execução são armazenados em listas (df_times e sql_times), e depois são convertidos em um DataFrame do Pandas para análise.
 
 # Análise Exploratória e Descritiva das Amostras
 
